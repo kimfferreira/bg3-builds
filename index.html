@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG3 Honor Mode — 4 Build Party</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0c0b0f;--surface:#141318;--surface2:#1c1b22;--surface3:#24232b;
+--border:#2e2d38;--text:#e8e6f0;--text2:#a09cb0;--text3:#6b6880;
+--gold:#d4a843;--gold2:#f0c85a;--gold-dim:#8a6d2a;
+--red:#c94040;--red-bg:#2a1414;--blue:#5088cc;--blue-bg:#0f1a2a;
+--green:#5aaa5a;--green-bg:#0f2a14;--purple:#9070cc;--purple-bg:#1a0f2a;
+--build1:#e06040;--build1-bg:#2a1810;--build1-border:#4a2218;
+--build2:#5090e0;--build2-bg:#0f1828;--build2-border:#18304a;
+--build3:#e0c040;--build3-bg:#2a2510;--build3-border:#4a4018;
+--build4:#a060d0;--build4-bg:#20102a;--build4-border:#38184a;
+--radius:6px;--sidebar-w:280px;
+}
+html{scroll-behavior:smooth;font-size:22px}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;display:flex;min-height:100vh}
+
+/* SIDEBAR */
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow:hidden;transition:transform .25s}
+#sidebar .logo{padding:20px 18px 12px;border-bottom:1px solid var(--border)}
+#sidebar .logo h1{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+#sidebar .logo p{font-size:.72rem;color:var(--text3);margin-top:2px;letter-spacing:.5px}
+#search-box{padding:10px 14px}
+#search-box input{width:100%;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.82rem;outline:none}
+#search-box input:focus{border-color:var(--gold-dim)}
+#search-box input::placeholder{color:var(--text3)}
+#nav{flex:1;overflow-y:auto;padding:6px 0 20px}
+#nav::-webkit-scrollbar{width:4px}
+#nav::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.nav-build{margin-bottom:2px}
+.nav-build-title{display:flex;align-items:center;gap:8px;padding:8px 16px;font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;letter-spacing:1px;cursor:pointer;color:var(--text2);transition:color .15s,background .15s;user-select:none}
+.nav-build-title:hover{color:var(--text);background:var(--surface2)}
+.nav-build-title .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.nav-build-title .arrow{margin-left:auto;font-size:.6rem;transition:transform .2s}
+.nav-build.open .arrow{transform:rotate(90deg)}
+.nav-sub{display:none;padding:0 0 4px}
+.nav-build.open .nav-sub{display:block}
+.nav-sub a{display:block;padding:4px 16px 4px 36px;font-size:.76rem;color:var(--text3);text-decoration:none;transition:color .12s,background .12s;line-height:1.5;cursor:pointer}
+.nav-sub a:hover,.nav-sub a.active{color:var(--text);background:var(--surface2)}
+
+/* MAIN */
+#main{margin-left:var(--sidebar-w);flex:1;padding:32px 40px 80px}
+.build-section{margin-bottom:60px}
+.build-header{padding:18px 22px;border-radius:var(--radius);margin-bottom:28px;border:1px solid}
+.build-header h2{font-family:'Cinzel',serif;font-size:1.5rem;letter-spacing:2px}
+.build-header p{font-size:.88rem;margin-top:6px;opacity:.8}
+
+.b1 .build-header{background:var(--build1-bg);border-color:var(--build1-border);color:var(--build1)}
+.b2 .build-header{background:var(--build2-bg);border-color:var(--build2-border);color:var(--build2)}
+.b3 .build-header{background:var(--build3-bg);border-color:var(--build3-border);color:var(--build3)}
+.b4 .build-header{background:var(--build4-bg);border-color:var(--build4-border);color:var(--build4)}
+
+/* SECTIONS */
+.section{margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.section-head{display:flex;align-items:center;padding:10px 16px;background:var(--surface);cursor:pointer;user-select:none;gap:8px;transition:background .12s}
+.section-head:hover{background:var(--surface2)}
+.section-head h3{font-family:'Cinzel',serif;font-size:.88rem;color:var(--gold);flex:1;letter-spacing:.5px}
+.section-head .chevron{color:var(--text3);font-size:.65rem;transition:transform .2s}
+.section.open .chevron{transform:rotate(90deg)}
+.section-body{display:none;padding:16px 18px;background:var(--surface2);font-size:.88rem}
+.section.open .section-body{display:block}
+
+/* CONTENT */
+h4{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold-dim);margin:16px 0 8px;letter-spacing:.5px}
+h4:first-child{margin-top:0}
+p,li{color:var(--text);margin-bottom:6px}
+ul,ol{padding-left:20px;margin-bottom:10px}
+li{margin-bottom:4px}
+strong{color:var(--gold2);font-weight:600}
+em{color:var(--text2);font-style:italic}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;margin:10px 0 14px}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{background:var(--surface);color:var(--gold-dim);font-family:'Cinzel',serif;font-weight:700;font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+td:first-child{white-space:nowrap;color:var(--text2)}
+
+/* DISCLAIMER BOX */
+.disclaimer{background:var(--surface);border-left:3px solid var(--gold-dim);padding:12px 16px;margin:10px 0;border-radius:0 var(--radius) var(--radius) 0;font-size:.84rem}
+.disclaimer li{margin-bottom:3px}
+
+/* TAG */
+.tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:.7rem;font-weight:600;letter-spacing:.3px;margin:0 3px 3px 0}
+.tag-r{background:var(--red-bg);color:var(--red)}.tag-b{background:var(--blue-bg);color:var(--blue)}
+.tag-g{background:var(--green-bg);color:var(--green)}.tag-p{background:var(--purple-bg);color:var(--purple)}
+
+/* FIDELITY */
+.fidelity{font-size:.82rem;color:var(--text2)}
+.fidelity h4{margin-top:14px}
+.fidelity li{color:var(--text2)}
+
+/* SEARCH HIGHLIGHT */
+.highlight{background:var(--gold-dim);color:var(--bg);padding:0 2px;border-radius:2px}
+
+/* MOBILE */
+#menu-btn{display:none;position:fixed;top:12px;left:12px;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--gold);padding:6px 10px;font-size:1.1rem;cursor:pointer}
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #menu-btn{display:block}
+  #main{margin-left:0;padding:52px 16px 60px}
+  .build-header h2{font-size:1.15rem}
+}
+
+/* BACK TO TOP */
+#top-btn{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);color:var(--gold);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;font-size:.9rem}
+#top-btn.show{opacity:1}
+</style>
+</head>
+<body>
+
+<button id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<aside id="sidebar">
+  <div class="logo">
+    <h1>BG3 Builds</h1>
+    <p>Honor Mode · 4 Build Party</p>
+  </div>
+  <div id="search-box"><input type="text" id="search" placeholder="Search... (e.g. Nyrulna, Alert)"></div>
+  <nav id="nav"></nav>
+</aside>
+
+<main id="main"></main>
+
+<div id="top-btn" onclick="window.scrollTo({top:0})">↑</div>
+
+<script>
+// ─── DATA ───
+const builds = [
+{
+  id:'b1',color:'var(--build1)',label:'Build 1',title:'Eldritch Knight Thrower',
+  summary:`Esta build é a principal fonte de dano bruto da party. A proposta é um <strong>thrower extremamente confiável</strong>, que quase não erra depois de Tavern Brawler, joga à distância com segurança e entrega burst muito alto já no turno 1. O narrador trata essa build como uma das mais confiáveis para Honor Mode justamente porque ela combina <strong>dano massivo</strong>, <strong>alta precisão</strong>, <strong>defesa forte</strong> e <strong>baixo risco de execução</strong>.<br><br>A composição final é <strong>Fighter (Eldritch Knight) 11 / War Cleric 1</strong>, com uma observação importante: no nível 11 total, o narrador recomenda um <strong>respec temporário para Fighter 11 puro</strong>, e só depois voltar a adicionar Cleric no nível 12, para antecipar o terceiro ataque. A condição de vitória da build é simples: <strong>apagar rapidamente o alvo mais perigoso do combate</strong> com uma sequência de arremessos, Action Surge e, no setup final, ataque bônus de War Cleric.`,
+  disclaimer:[
+    'Depende fortemente de <strong>Tavern Brawler</strong>.',
+    'Pode ser jogada em duas versões: <strong>com Elixirs de Strength</strong> ou <strong>sem elixirs</strong>.',
+    'Faz <strong>multiclass</strong> com <strong>War Cleric 1</strong>.',
+    'O narrador recomenda <strong>respec no nível 11 total</strong> para otimização.',
+    'Depende de <strong>armas com propriedade Thrown</strong> e valoriza <strong>Nyrulna</strong> no late game.',
+    'Tem fraqueza relevante contra <strong>efeitos de Wisdom save</strong> debilitantes.'
+  ],
+  sections:[
+    {title:'Leveling Overview',content:`<div class="tbl-wrap"><table>
+<tr><th>Nível</th><th>Classe</th><th>Subclass</th><th>Feat / Pick</th><th>Spell / Utilidade</th><th>Motivo</th></tr>
+<tr><td>1</td><td>Fighter</td><td>—</td><td>Defense Fighting Style</td><td>—</td><td>Base defensiva alta</td></tr>
+<tr><td>2</td><td>Fighter 2</td><td>—</td><td>—</td><td>Action Surge</td><td>Explosão de turno</td></tr>
+<tr><td>3</td><td>Fighter 3</td><td>Eldritch Knight</td><td>—</td><td>Shield, Magic Missile, Longstrider</td><td>Weapon Bond + utilidade</td></tr>
+<tr><td>4</td><td>Fighter 4</td><td>Eldritch Knight</td><td>Tavern Brawler</td><td>Chromatic Orb (filler)</td><td>Build "liga" aqui</td></tr>
+<tr><td>5</td><td>Fighter 5</td><td>Eldritch Knight</td><td>—</td><td>Enhance Leap</td><td>Extra Attack + mobilidade</td></tr>
+<tr><td>6</td><td>Fighter 6</td><td>Eldritch Knight</td><td>+STR até 20 ou Alert (c/ elixir)</td><td>—</td><td>Mais dano / iniciativa</td></tr>
+<tr><td>7</td><td>Cleric 1</td><td>War Domain</td><td>—</td><td>Bless / Sanctuary / Healing Word / Create Water</td><td>Mais burst + utilidade</td></tr>
+<tr><td>8</td><td>Fighter 7</td><td>Eldritch Knight</td><td>—</td><td>Darkness / Arcane Lock</td><td>Utilidade / cheese</td></tr>
+<tr><td>9</td><td>Fighter 8</td><td>Eldritch Knight</td><td>Alert</td><td>Misty Step</td><td>Iniciativa + reposicionamento</td></tr>
+<tr><td>10</td><td>Fighter 9</td><td>Eldritch Knight</td><td>—</td><td>—</td><td>Indomitable</td></tr>
+<tr><td>11</td><td>Fighter 10</td><td>Eldritch Knight</td><td>—</td><td>utilidade</td><td>Respec sugerido → Fighter 11 puro</td></tr>
+<tr><td>12</td><td>Fighter 11</td><td>Eldritch Knight</td><td>—</td><td>—</td><td>Improved Extra Attack; Cleric volta após respec</td></tr>
+</table></div>`},
+    {title:'Starting the Game — Level 1',content:`<h4>Races</h4><p>O narrador não fixa uma raça obrigatória, mas cita: <strong>Dwarf</strong>, <strong>Wood Elf</strong>, <strong>Halfling</strong> e <strong>Githyanki</strong>. Usa <strong>Lae'zel</strong> como exemplo e considera <strong>Githyanki</strong> forte por <strong>Misty Step</strong> extra.</p>
+<h4>Class</h4><p><strong>Fighter.</strong> Acesso imediato a armadura pesada, base defensiva alta e progressão direta para Action Surge, Extra Attack e Eldritch Knight.</p>
+<h4>Background</h4><p><em>Não informado na fonte.</em></p>
+<h4>Abilities — Versão sem elixir</h4>
+<div class="tbl-wrap"><table><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+<tr><td><strong>17</strong></td><td>14</td><td>16</td><td>Não claro</td><td>10</td><td>Não claro</td></tr></table></div>
+<h4>Abilities — Versão com elixir</h4>
+<div class="tbl-wrap"><table><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+<tr><td>8</td><td>"um pouco mais"</td><td>17</td><td>Não claro</td><td>"ligeiramente melhor"</td><td>Não claro</td></tr></table></div>
+<p><strong>STR</strong>: dano/precisão via Tavern Brawler · <strong>CON</strong>: robustez · <strong>DEX</strong>: AC/iniciativa · <strong>WIS</strong>: saves mentais (fraqueza da build)</p>
+<h4>Skills and Expertise</h4><p><em>Não informado com clareza na transcrição.</em></p>`},
+    {title:'Leveling Progression — Level 2-12',content:`<h4>Level 2 — Fighter 2</h4><p><strong>Action Surge.</strong> Grande pico de burst cedo.</p>
+<h4>Level 3 — Fighter 3 (Eldritch Knight)</h4><p><strong>Weapon Bond</strong> permite arremessar armas e trazê-las de volta. Picks: Blade Ward ou Mage Hand, Minor Illusion, <strong>Shield</strong>, <strong>Magic Missile</strong>, <strong>Longstrider</strong>.</p>
+<h4>Level 4 — Fighter 4</h4><p>Feat: <strong>Tavern Brawler</strong> (+STR se sem elixir, +CON se com). <strong>Grande powerspike de precisão e dano.</strong> Chromatic Orb como filler.</p>
+<h4>Level 5 — Fighter 5</h4><p><strong>Extra Attack</strong> + <strong>Enhance Leap</strong>. Volume de dano e mobilidade tática sobem muito.</p>
+<h4>Level 6 — Fighter 6</h4><p>Feat: <strong>+STR até 20</strong> (sem elixir) ou <strong>Alert</strong> (com elixir). Consolida dano ou iniciativa.</p>
+<h4>Level 7 — Cleric 1 (War Domain)</h4><p><strong>War Priest charges</strong> + spells: <strong>Bless</strong>, Sanctuary, Healing Word, Create/Destroy Water. Ataque bônus limitado por dia e utilidade de emergência.</p>
+<h4>Level 8 — Fighter 7</h4><p>Picks flexíveis: <strong>Darkness</strong>, <strong>Arcane Lock</strong>. Utilidade / cheese encounter.</p>
+<h4>Level 9 — Fighter 8</h4><p>Feat: <strong>Alert</strong> + <strong>Misty Step</strong>. Iniciativa consistente e reposicionamento seguro. Pode trocar spells antigos por Invisibility ou Cloud of Daggers.</p>
+<h4>Level 10 — Fighter 9</h4><p><strong>Indomitable.</strong> Melhora resiliência contra saves. Procurar gear de saving throws e imunidade a medo.</p>
+<h4>Level 11 — Fighter 10</h4><p>Utilidade incremental. <strong>Recomendação: respec para Fighter 11 / Cleric 0</strong> para o terceiro ataque imediato.</p>
+<h4>Level 12 — Fighter 11</h4><p><strong>Improved Extra Attack.</strong> Fecha com <strong>7 ataques</strong> no round de abertura (Action Surge + War Priest). Se fizer respec, Cleric volta após isso.</p>`},
+    {title:'Maximizing Ability Scores',content:`<p>Dois caminhos:</p><ul>
+<li><strong>Sem elixir:</strong> sobe <strong>Strength até 20</strong>, pega <strong>Alert</strong> depois.</li>
+<li><strong>Com elixir:</strong> STR baixa no sheet, usa <strong>Elixir of Strength</strong> diariamente, libera Alert mais cedo.</li></ul>
+<p>Também sugere melhorar <strong>saving throws via itens</strong> e mitigar fraqueza mental com <strong>Heroes' Feast</strong> ou <strong>Calm Emotions</strong>.</p>`},
+    {title:'Potions, Elixirs & Consumables',content:`<ul>
+<li><strong>Elixir of Strength:</strong> opção central na variante com STR 8.</li>
+<li><strong>Bloodlust Elixir:</strong> alternativa quando não depende de Strength elixir.</li>
+<li><strong>Resistance Elixirs:</strong> alternativa situacional para lutas específicas.</li></ul>
+<p><em>Potions e weapon coatings não informados na fonte.</em></p>`},
+    {title:'Equipment Recommendations',content:`<h4>Act 1</h4><p><em>Não informado com clareza por ato.</em> Itens citados: qualquer arma com propriedade <strong>Thrown</strong>, <strong>heavy armor</strong>, <strong>shield</strong>, <strong>Ring of Flinging</strong>.</p>
+<h4>Act 2</h4><p>Itens com <strong>damage on hit</strong>, itens que melhorem <strong>saving throws</strong>, melhor armadura pesada e escudo.</p>
+<h4>Act 3 — Final</h4><ul>
+<li><strong>Nyrulna</strong> — best in slot</li>
+<li>Melhor <strong>full plate</strong> disponível</li>
+<li><strong>Shield</strong></li>
+<li>Itens de <strong>damage on hit</strong></li>
+<li>Itens defensivos para <strong>saves mentais</strong></li></ul>`},
+    {title:'Build Mechanics & Combos',content:`<h4>Loop Principal</h4><ol>
+<li>Entrar bem posicionado</li>
+<li>Abrir com sequência de arremessos</li>
+<li>Usar <strong>Action Surge</strong> para repetir a rotina</li>
+<li>Adicionar ataque bônus de <strong>War Priest</strong></li>
+<li>Manter segurança com <strong>Shield</strong>, <strong>Misty Step</strong> e <strong>Enhance Leap</strong></li></ol>
+<h4>Early Game</h4><p>Thrower seguro, boa AC, Action Surge como acelerador. A build já é útil cedo, mas o verdadeiro "liga" é <strong>Tavern Brawler</strong>.</p>
+<h4>Late Game</h4><p>Opener de <strong>7 ataques</strong> no round de abertura, mobilidade de Misty Step/Enhance Leap, proteção por Shield. Fecha lutas removendo o alvo principal.</p>`},
+    {title:'Build Variations',content:`<ul>
+<li><strong>Versão com Elixir of Strength:</strong> mais otimizada em stats brutos.</li>
+<li><strong>Versão sem elixir:</strong> mais confortável sem dependência diária.</li>
+<li><strong>Comparação com Berserker Thrower:</strong> narrador prefere EK pelo pacote defensivo e burst inicial.</li></ul>`},
+    {title:'Conclusion',content:`<p>Build para quem quer <strong>dano confiável</strong>, execução simples e alta margem de segurança em Honor Mode.</p>
+<p><span class="tag tag-g">Força</span> Burst + precisão + defesa</p>
+<p><span class="tag tag-r">Fraqueza</span> Wisdom saves debilitantes</p>
+<p><span class="tag tag-b">Brilha em</span> Apagar alvo prioritário imediatamente</p>`},
+    {title:'Source Fidelity Notes',content:`<div class="fidelity">
+<h4>Explicitly Stated</h4><ul><li>EK Thrower é a build 1</li><li>Tavern Brawler é o feat central</li><li>Duas versões: com ou sem Elixir of Strength</li><li>Usa 1 nível de War Cleric</li><li>Nyrulna destacada para endgame</li><li>Alert recomendado em algum ponto</li></ul>
+<h4>Reorganized From Scattered Mentions</h4><ul><li>Progressão por nível</li><li>Pacote de utilidade (Longstrider, Shield, Enhance Leap, Misty Step)</li><li>Observações sobre fraqueza a Wisdom saves</li><li>Organização das opções de Cleric spells</li></ul>
+<h4>Ambiguous / Unclear</h4><ul><li>Valores exatos do stat spread com elixir</li><li>Alguns spells "filler"</li><li>Parte do texto de AC truncada/garbled</li></ul>
+<h4>Not Mentioned</h4><ul><li>Background ideal</li><li>Skills iniciais exatas</li><li>Expertise</li><li>Poderes illithid específicos</li><li>Consumíveis além dos elixires citados</li></ul>
+<h4>Possible Inconsistencies</h4><ul><li>Fala sobre AC de full plate sai truncada</li><li>Curva normal atrasa terceiro ataque para 12; por isso respec no 11</li></ul>
+<h4>Cross-Build Contamination Risks</h4><ul><li>Bless/Healing Word/Create Water aparecem por causa do dip de Cleric, mas são centrais ao Cleric da party</li><li>Soluções contra Wisdom saves dependem da sinergia com o Light Cleric</li></ul>
+</div>`}
+  ]
+},
+{
+  id:'b2',color:'var(--build2)',label:'Build 2',title:'Abjuration Tank Wizard',
+  summary:`A segunda build é um <strong>tank wizard</strong>: mantém todo o pacote de wizard, mas reduz drasticamente o risco pessoal com <strong>Arcane Ward</strong>. A ideia central é absorver pressão, devolver dano com <strong>Armor of Agathys</strong> e <strong>Fire Shield</strong>, proteger aliados com <strong>Projected Ward</strong> e funcionar como caster completo de controle, utilidade e summons.<br><br>Composição: <strong>White Draconic Sorcerer 1 / Abjuration Wizard 11</strong>. O nível de Sorcerer existe para pegar <strong>Con save proficiency</strong> e <strong>Armor of Agathys</strong>. Condição de vitória: transformar o mago em peça central defensiva — entra no meio da luta, empilha ward, nega dano, castiga hits e resolve com Glyph of Warding, Haste, Wall of Fire e Globe of Invulnerability.`,
+  disclaimer:[
+    '<strong>Multiclass obrigatório</strong> com <strong>White Draconic Sorcerer 1</strong>.',
+    'Demora um pouco mais para "ligar"; fica "basicamente invencível" por volta do nível 4 total.',
+    'Spell list depende parcialmente de <strong>scrolls encontrados</strong>.',
+    'Candidato natural para <strong>scrolls</strong> e provavelmente <strong>illithid powers</strong>.',
+    'Pode ser jogada mais ou menos <strong>summon-heavy</strong>.'
+  ],
+  sections:[
+    {title:'Leveling Overview',content:`<div class="tbl-wrap"><table>
+<tr><th>Nível</th><th>Classe</th><th>Subclass</th><th>Feat / Pick</th><th>Spell / Utilidade</th><th>Motivo</th></tr>
+<tr><td>1</td><td>Sorcerer 1</td><td>White Draconic</td><td>—</td><td>Armor of Agathys, Shield, Magic Missile</td><td>Base defensiva + Con save</td></tr>
+<tr><td>2</td><td>Wizard 1</td><td>—</td><td>—</td><td>Ray of Frost, Bone Chill, Grease, Chromatic Orb</td><td>Entra no chassis de wizard</td></tr>
+<tr><td>3</td><td>Wizard 2</td><td>Abjuration</td><td>—</td><td>Arcane Ward</td><td>Build começa a funcionar</td></tr>
+<tr><td>4</td><td>Wizard 3</td><td>Abjuration</td><td>—</td><td>Arcane Lock, Cloud of Daggers</td><td>Empilhar ward fora de combate</td></tr>
+<tr><td>5</td><td>Wizard 4</td><td>Abjuration</td><td>Alert ou INT</td><td>Misty Step, Web, Flaming Sphere</td><td>Iniciativa / DC</td></tr>
+<tr><td>6</td><td>Wizard 5</td><td>Abjuration</td><td>—</td><td>Counterspell, Glyph of Warding, Haste</td><td>Núcleo de controle</td></tr>
+<tr><td>7</td><td>Wizard 6</td><td>Abjuration</td><td>—</td><td>Projected Ward, Protection from Energy</td><td>Defesa da party</td></tr>
+<tr><td>8</td><td>Wizard 7</td><td>Abjuration</td><td>—</td><td>Fire Shield, Conjure Minor Elemental</td><td>Retaliation + summons</td></tr>
+<tr><td>9</td><td>Wizard 8</td><td>Abjuration</td><td>+INT ou Alert</td><td>Banishment / Ice synergies</td><td>Reforço de save DC</td></tr>
+<tr><td>10</td><td>Wizard 9</td><td>Abjuration</td><td>—</td><td>Conjure Elemental, Wall of Fire</td><td>Mid/late utility</td></tr>
+<tr><td>11</td><td>Wizard 10</td><td>Abjuration</td><td>—</td><td>Dependentes de scrolls</td><td>Flex slot</td></tr>
+<tr><td>12</td><td>Wizard 11</td><td>Abjuration</td><td>—</td><td>Globe of Invulnerability, Wall of Ice/Disintegrate</td><td>Utilidade final</td></tr>
+</table></div>`},
+    {title:'Starting the Game — Level 1',content:`<h4>Races</h4><p><em>Não informado na fonte.</em></p>
+<h4>Class</h4><p><strong>Sorcerer</strong> (White Draconic). Motivo: <strong>Armor of Agathys</strong> + proficiência em <strong>Constitution saves</strong>.</p>
+<h4>Background</h4><p><em>Não informado na fonte.</em></p>
+<h4>Abilities</h4><p>A transcrição não traz array completa. Apenas hierarquia e CON explícito:</p>
+<div class="tbl-wrap"><table><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+<tr><td>Não claro</td><td>Secundário</td><td><strong>16</strong></td><td><strong>Primário</strong></td><td>Secundário/"decent"</td><td>Baixo</td></tr></table></div>
+<p><strong>INT</strong>: casting stat principal · <strong>CON 16 + proficiência</strong>: concentração estável · <strong>CHA</strong>: propositalmente baixa (não quer spells de Sorcerer com save DC).</p>
+<h4>Skills and Expertise</h4><p><em>Não informado na fonte.</em></p>`},
+    {title:'Leveling Progression — Level 2-12',content:`<h4>Level 2 — Wizard 1</h4><p>Entrada no chassis de Wizard. Picks: Ray of Frost, Bone Chill, Grease, Chromatic Orb, Fog Cloud. Find Familiar citado como opção.</p>
+<h4>Level 3 — Wizard 2 (Abjuration)</h4><p><strong>Arcane Ward.</strong> Priorizar magias de abjuração ao subir. Empilhamento constante de ward.</p>
+<h4>Level 4 — Wizard 3</h4><p>Acesso a magias de nível 2. <strong>Arcane Lock</strong> empilha ward fora de combate; <strong>Cloud of Daggers</strong> sempre útil.</p>
+<h4>Level 5 — Wizard 4</h4><p>Feat: <strong>Alert</strong> ou <strong>INT</strong>. <strong>Misty Step</strong> é key spell. Vencer iniciativa deixa o tank entrar primeiro.</p>
+<h4>Level 6 — Wizard 5</h4><p><strong>Counterspell</strong>, <strong>Glyph of Warding</strong>, <strong>Haste</strong>. Glyph tratado como spell principal de combate.</p>
+<h4>Level 7 — Wizard 6</h4><p><strong>Projected Ward.</strong> Protection from Energy, Animate Dead. A build passa a proteger a party por reação. Ótima candidata para summons.</p>
+<h4>Level 8 — Wizard 7</h4><p><strong>Fire Shield</strong>, Conjure Minor Elemental. Fecha o loop de retaliation com Armor of Agathys. Ice Storm e Banishment também citadas.</p>
+<h4>Level 9 — Wizard 8</h4><p>Feat: <strong>+INT</strong> ou <strong>Alert</strong> (conforme tomou antes). Consolida save DC ou iniciativa.</p>
+<h4>Level 10 — Wizard 9</h4><p><strong>Conjure Elemental</strong>, <strong>Wall of Fire</strong>. Mago descrito como "Wall of Fire character".</p>
+<h4>Level 11 — Wizard 10</h4><p>Flex: dependente de scrolls. Aprender praticamente todo scroll possível.</p>
+<h4>Level 12 — Wizard 11</h4><p><strong>Globe of Invulnerability</strong> é o grande destaque. Wall of Ice ou <strong>Disintegrate</strong> (útil em luta específica / final boss).</p>`},
+    {title:'Maximizing Ability Scores',content:`<p>Maximiza <strong>INT</strong> ao longo da progressão. Duas linhas:</p><ul>
+<li><strong>Alert cedo</strong> → compensa DC com gear</li>
+<li><strong>INT cedo</strong> → mais confiável em saves</li></ul>
+<p>Usar <strong>gear de save DC</strong> se escolher a linha defensiva/initiative-based. Sem menção a Hag Hair, Mirror ou bônus permanentes específicos.</p>`},
+    {title:'Potions, Elixirs & Consumables',content:`<p><em>Não informado na fonte.</em></p>`},
+    {title:'Illithid Powers',content:`<p>A transcrição <strong>não lista poderes específicos</strong>, mas sugere que este personagem será o <strong>usuário de scrolls e illithid powers da party</strong>.</p>`},
+    {title:'Equipment Recommendations',content:`<h4>Critérios Gerais</h4><ul><li>Gear de <strong>save DC</strong></li><li>Gear de <strong>damage reduction</strong></li><li>Gear que aumente <strong>cold damage</strong></li></ul>
+<h4>Itens Citados (sem ato preciso)</h4><ul><li><strong>Bonespike Garb</strong></li><li><strong>Snowburst Ring</strong></li></ul>
+<h4>Act 3 — Final</h4><ul><li><strong>Markoheshkir</strong> — item importante de late game</li><li>Seguir priorizando save DC gear, defensive gear e cold synergy</li></ul>`},
+    {title:'Build Mechanics & Combos',content:`<h4>Loop Central</h4><ol>
+<li>Empilhar <strong>Arcane Ward</strong></li>
+<li>Entrar no meio da luta</li>
+<li>Usar <strong>Blade Ward</strong> quando necessário</li>
+<li>Punir com <strong>Armor of Agathys + Fire Shield</strong></li>
+<li>Controlar com <strong>Glyph of Warding</strong>, <strong>Counterspell</strong>, <strong>Haste</strong>, <strong>Wall of Fire</strong></li>
+<li>Proteger aliados com <strong>Projected Ward</strong></li></ol>
+<h4>Early Game</h4><p>Ponto mais lento. Jogável no nível 2, mas "quase invencível" só por volta do 4 total.</p>
+<h4>Late Game</h4><p>Centro de gravidade do combate: atrai foco, quase não morre, castiga hits, protege aliados, resolve com <strong>Globe of Invulnerability</strong>, Wall of Fire, summons e controle.</p>`},
+    {title:'Build Variations',content:`<ul>
+<li><strong>Feat path:</strong> Alert cedo <em>vs</em> mais INT cedo</li>
+<li><strong>Summon-heavy</strong> <em>vs</em> spellbook mais enxuto</li>
+<li>Depende em parte de <strong>scrolls</strong> encontrados</li></ul>`},
+    {title:'Conclusion',content:`<p>Build para quem quer um <strong>wizard absurdamente seguro</strong>, sem perder controle e resolução de encounters.</p>
+<p><span class="tag tag-g">Força</span> Sobrevivência absurda + ferramental completo de wizard</p>
+<p><span class="tag tag-r">Fraqueza</span> "Engata" mais tarde que as outras três</p>
+<p><span class="tag tag-b">Brilha em</span> Lutas longas, chefes perigosos, negar dano e ação</p>`},
+    {title:'Source Fidelity Notes',content:`<div class="fidelity">
+<h4>Explicitly Stated</h4><ul><li>É a segunda build</li><li>Começa como White Draconic Sorcerer</li><li>Vira Abjuration Wizard</li><li>Armor of Agathys, Arcane Ward e Fire Shield são pilares</li><li>Glyph of Warding e Counterspell são centrais</li><li>Globe of Invulnerability é grande destaque</li></ul>
+<h4>Reorganized</h4><ul><li>Curva de levels</li><li>Separação: defensive loop, control loop, summon package</li><li>Itemização geral por critérios</li></ul>
+<h4>Ambiguous / Unclear</h4><ul><li>Array numérica completa de atributos</li><li>Timing exato de spell picks intermediários</li><li>Nomes de itens transcritos deformados (ex: Markoheshkir)</li></ul>
+<h4>Not Mentioned</h4><ul><li>Raça ideal, background, skills, illithid powers específicos, consumíveis</li></ul>
+<h4>Possible Inconsistencies</h4><ul><li>Narrador alterna entre "character level" e "wizard level"</li><li>Spell list final depende de scrolls</li></ul>
+<h4>Cross-Build Contamination</h4><ul><li>Misty Step e Counterspell aparecem em mais de um personagem</li><li>Create Water e sinergias frias podem parecer do Cleric</li></ul>
+</div>`}
+  ]
+},
+{
+  id:'b3',color:'var(--build3)',label:'Build 3',title:'Light Cleric',
+  summary:`A terceira build é um <strong>Light Cleric 12 puro</strong>. Na party por dois motivos: forte por si só, mas principalmente adiciona <strong>camadas defensivas</strong> e a engine de <strong>Radiating Orb stacking</strong>, tornando a party mais difícil de acertar. Contribui com dano via <strong>Spirit Guardians</strong>, <strong>Radiance of the Dawn</strong>, <strong>Fireball</strong>.<br><br>Condição de vitória: <strong>controle defensivo + pressão contínua</strong>. Melhora sobrevivência da party com <strong>Warding Flare / Improved Warding Flare</strong>, ativa itens de buff on heal com <strong>Mass Healing Word</strong> e enfraquece chefes via <strong>Radiating Orb</strong>.`,
+  disclaimer:[
+    '<strong>Mono-class</strong>: Cleric 12.',
+    'Usa fortemente <strong>Radiating Orb</strong> como eixo de mid/late game.',
+    'Duas formas de itemização: foco em <strong>buff-on-heal items</strong> ou foco em <strong>stackar Radiating Orb</strong>.',
+    'Desvantagem: <strong>não ganha Misty Step</strong> naturalmente; recomenda item que forneça isso.'
+  ],
+  sections:[
+    {title:'Leveling Overview',content:`<div class="tbl-wrap"><table>
+<tr><th>Nível</th><th>Classe</th><th>Subclass</th><th>Feat / Pick</th><th>Spell / Utilidade</th><th>Motivo</th></tr>
+<tr><td>1</td><td>Cleric 1</td><td>Light Domain</td><td>—</td><td>Cantrips + Warding Flare</td><td>Base defensiva/utilitária</td></tr>
+<tr><td>2</td><td>Cleric 2</td><td>Light Domain</td><td>—</td><td>Radiance of the Dawn</td><td>Nuke forte de early</td></tr>
+<tr><td>3</td><td>Cleric 3</td><td>Light Domain</td><td>—</td><td>Spiritual Weapon, Flaming Sphere, Scorching Ray</td><td>Dano/utilidade</td></tr>
+<tr><td>4</td><td>Cleric 4</td><td>Light Domain</td><td>+1/+1 (corrigir odds)</td><td>Blade Ward</td><td>Estabiliza atributos</td></tr>
+<tr><td>5</td><td>Cleric 5</td><td>Light Domain</td><td>—</td><td>Mass Healing Word, Spirit Guardians, Fireball, Aid</td><td>Núcleo da build</td></tr>
+<tr><td>6</td><td>Cleric 6</td><td>Light Domain</td><td>—</td><td>Improved Warding Flare</td><td>Defesa da party</td></tr>
+<tr><td>7</td><td>Cleric 7</td><td>Light Domain</td><td>—</td><td>Wall of Fire, Guardian of Faith, Freedom of Movement</td><td>Mid game forte</td></tr>
+<tr><td>8</td><td>Cleric 8</td><td>Light Domain</td><td>Alert</td><td>—</td><td>Iniciativa alta</td></tr>
+<tr><td>9</td><td>Cleric 9</td><td>Light Domain</td><td>—</td><td>Destructive Wave</td><td>Controle + dano</td></tr>
+<tr><td>10</td><td>Cleric 10</td><td>Light Domain</td><td>—</td><td>Divine Intervention</td><td>Arma BIS + utilidade</td></tr>
+<tr><td>11</td><td>Cleric 11</td><td>Light Domain</td><td>—</td><td>Heroes' Feast</td><td>Buff diário forte</td></tr>
+<tr><td>12</td><td>Cleric 12</td><td>Light Domain</td><td>+2 WIS</td><td>—</td><td>Fecha casting stat</td></tr>
+</table></div>`},
+    {title:'Starting the Game — Level 1',content:`<h4>Races</h4><p><em>Não informado na fonte.</em></p>
+<h4>Class</h4><p><strong>Cleric</strong> (Light Domain). Acesso imediato a <strong>Warding Flare</strong>, medium armor e spell list útil.</p>
+<h4>Background</h4><p><em>Não informado na fonte.</em></p>
+<h4>Abilities</h4><p>Ponto de partida: split <strong>15 / 16 / 17</strong>, com os outros três em <strong>8</strong>.</p>
+<div class="tbl-wrap"><table><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+<tr><td>8</td><td><strong>16</strong></td><td><strong>15</strong></td><td>8</td><td><strong>17</strong></td><td>8</td></tr></table></div>
+<p><strong>WIS</strong>: stat principal · <strong>DEX 16</strong>: AC e iniciativa · <strong>CON 15</strong>: robustez, será "consertado" no ASI.</p>
+<h4>Skills and Expertise</h4><p><em>Não informado na fonte.</em></p>`},
+    {title:'Leveling Progression — Level 2-12',content:`<h4>Level 2 — Cleric 2</h4><p><strong>Radiance of the Dawn.</strong> Early game forte. Picks: Sanctuary, Command, Healing Word, Bless, Guiding Bolt. Guiding Bolt pode sair depois para <strong>Create Water</strong> (sinergia com Wizard).</p>
+<h4>Level 3 — Cleric 3</h4><p><strong>Spiritual Weapon</strong>, <strong>Flaming Sphere</strong>, <strong>Scorching Ray</strong>.</p>
+<h4>Level 4 — Cleric 4</h4><p>ASI: "corrigir odd numbers" → <strong>WIS 17→18</strong> e provavelmente <strong>CON 15→16</strong>. Blade Ward como cantrip útil.</p>
+<h4>Level 5 — Cleric 5</h4><p><strong>Spirit Guardians</strong>, <strong>Mass Healing Word</strong>, <strong>Fireball</strong>, <strong>Aid</strong>, Animate Dead. Núcleo real de combate e suporte.</p>
+<h4>Level 6 — Cleric 6</h4><p><strong>Improved Warding Flare.</strong> Sinergiza com Projected Ward do Wizard.</p>
+<h4>Level 7 — Cleric 7</h4><p><strong>Wall of Fire</strong>, <strong>Guardian of Faith</strong>, <strong>Freedom of Movement</strong>. Narrador especula sobre Guardian of Faith sem confirmar totalmente.</p>
+<h4>Level 8 — Cleric 8</h4><p>Feat: <strong>Alert</strong>. Iniciar cedo para orb stacking e limpeza de adds.</p>
+<h4>Level 9 — Cleric 9</h4><p><strong>Destructive Wave.</strong> Dano + knockdown sem acertar aliados.</p>
+<h4>Level 10 — Cleric 10</h4><p><strong>Divine Intervention.</strong> Arma BIS do personagem; healing aura destacada.</p>
+<h4>Level 11 — Cleric 11</h4><p><strong>Heroes' Feast.</strong> Resolve fraqueza mental da party (especialmente do EK).</p>
+<h4>Level 12 — Cleric 12</h4><p>ASI: <strong>+2 WIS</strong>. Fecha stat principal.</p>`},
+    {title:'Maximizing Ability Scores',content:`<p>Quer chegar a <strong>20 WIS</strong>, mantendo <strong>DEX 16</strong> e corrigindo o stat odd cedo. Maximização via <strong>ASI/feat</strong> e escolha de armadura média sem cap de DEX. Sem menção a hair, mirror ou bônus permanentes.</p>`},
+    {title:'Potions, Elixirs & Consumables',content:`<p><em>Não informado na fonte.</em></p>`},
+    {title:'Illithid Powers',content:`<p><em>Não informado na fonte.</em></p>`},
+    {title:'Equipment Recommendations',content:`<h4>Itens Citados (sem ato fixado)</h4><ul>
+<li><strong>Whispering Promise</strong></li>
+<li><strong>Hellrider's Pride</strong></li>
+<li><strong>Boots of Aid and Comfort</strong></li></ul>
+<h4>Mid Game</h4><ul><li>Medium armor <strong>sem cap de DEX</strong></li><li>Shield</li><li>Gear de <strong>Radiating Orb stacking</strong></li><li>Itens de <strong>buff on heal</strong> (dependendo da rota)</li></ul>
+<h4>Act 3 — Final</h4><ul>
+<li><strong>Armor of Agility</strong></li>
+<li>Shield</li>
+<li>Item de <strong>Misty Step</strong></li>
+<li><strong>Nightwalkers</strong></li></ul>`},
+    {title:'Build Mechanics & Combos',content:`<h4>Loop Principal</h4><ol>
+<li>Abrir cedo (Alert)</li>
+<li>Aplicar <strong>Spirit Guardians</strong></li>
+<li>Correr pelo mapa acumulando <strong>Radiating Orb</strong> e limpando adds</li>
+<li>Usar <strong>Mass Healing Word</strong> para ativar itens de buff on heal</li>
+<li>Negar hits com <strong>Warding Flare / Improved Warding Flare</strong></li>
+<li>Complementar com <strong>Radiance of the Dawn</strong>, <strong>Fireball</strong>, <strong>Destructive Wave</strong></li></ol>
+<h4>Early Game</h4><p>Destaque: <strong>Radiance of the Dawn</strong>, Command, Guiding Bolt, Healing Word. Muito forte cedo.</p>
+<h4>Late Game</h4><p>Engine de <strong>Spirit Guardians + Radiating Orb + suporte reativo</strong>. Destructive Wave, Heroes' Feast e pacote de sobrevivência.</p>`},
+    {title:'Build Variations',content:`<ul>
+<li><strong>Rota 1:</strong> foco em <strong>buff-on-heal items</strong></li>
+<li><strong>Rota 2:</strong> maximizar <strong>Radiating Orb stacking</strong></li>
+</ul><p>Ambas explicitamente citadas como válidas.</p>`},
+    {title:'Conclusion',content:`<p>Build para quem quer um <strong>suporte ofensivo extremamente estável</strong> em Honor Mode.</p>
+<p><span class="tag tag-g">Força</span> Orb stacking + Spirit Guardians + defesa da party</p>
+<p><span class="tag tag-r">Fraqueza</span> Depende de item externo para Misty Step</p>
+<p><span class="tag tag-b">Brilha em</span> Múltiplos inimigos, combates longos, cola defensiva</p>`},
+    {title:'Source Fidelity Notes',content:`<div class="fidelity">
+<h4>Explicitly Stated</h4><ul><li>É a terceira build</li><li>Light Cleric 12 puro</li><li>Warding Flare e Improved Warding Flare centrais</li><li>Radiating Orb é grande motivo de usar a build</li><li>Spirit Guardians é spell principal</li></ul>
+<h4>Reorganized</h4><ul><li>Curva por nível</li><li>Separação: rota heal-buff items vs orb stacking</li><li>Relação com defesa global da party</li></ul>
+<h4>Ambiguous / Unclear</h4><ul><li>ASI do nível 4 confuso</li><li>Ato exato de vários itens</li><li>Guardian of Faith especulação</li></ul>
+<h4>Not Mentioned</h4><ul><li>Raça, background, skills, illithid powers, consumíveis</li></ul>
+<h4>Possible Inconsistencies</h4><ul><li>"18 Wisdom and 16 Dexterity" conflita com DEX já estar em 16</li></ul>
+<h4>Cross-Build Contamination</h4><ul><li>Create Water por sinergia com Wizard</li><li>Buff on heal items podem migrar para build 4</li></ul>
+</div>`}
+  ]
+},
+{
+  id:'b4',color:'var(--build4)',label:'Build 4',title:'Swords Bard Archer',
+  summary:`A quarta build cobre as lacunas de <strong>skills, face, lockpicking, dano à distância e controle</strong>. O narrador escolhe <strong>Swords Bard focado em arco</strong> porque é "broken", dá muito dano e cobre a parte social/utilitária.<br><br>Composição: <strong>Swords Bard 10 / Fighter 2</strong>. Condição de vitória: empilhar <strong>Arcane Acuity</strong> batendo com flechas, depois transformar em <strong>controle de bônus action</strong> com <strong>Band of the Mystic Scoundrel</strong> usando Tasha's, Hold Person, Hold Monster, Confusion. Carrega face skills, Sleight of Hand e utilidades de campanha.`,
+  disclaimer:[
+    'Maior ambiguidade: narrador menciona <strong>Lore Bard</strong> como alternativa antes de fixar <strong>Swords Bard</strong>.',
+    'Build mais "greedy" em gear entre as quatro.',
+    'Depende fortemente de <strong>Helmet of Arcane Acuity + Band of the Mystic Scoundrel</strong>.',
+    'Pode usar <strong>Strength Elixirs</strong> se optar por <strong>Titanstring Bow</strong>.',
+    'Pode usar <strong>Gloves of Dexterity</strong> com respec de atributos no mid/late.',
+    'Admite variações: <strong>12 Swords Bard</strong>, <strong>War Cleric dip</strong>, outro split com Fighter.'
+  ],
+  sections:[
+    {title:'Leveling Overview',content:`<div class="tbl-wrap"><table>
+<tr><th>Nível</th><th>Classe</th><th>Subclass</th><th>Feat / Pick</th><th>Spell / Utilidade</th><th>Motivo</th></tr>
+<tr><td>1</td><td>Bard 1</td><td>—</td><td>—</td><td>Vicious Mockery, Friends, Healing Word, Dissonant Whispers, Tasha's</td><td>Face + setup futuro</td></tr>
+<tr><td>2</td><td>Bard 2</td><td>—</td><td>—</td><td>Utility flex (ex. Feather Fall)</td><td>Skills</td></tr>
+<tr><td>3</td><td>Bard 3</td><td>College of Swords</td><td>Two-Weapon Fighting</td><td>Cloud of Daggers, Hold Person</td><td>Chassis ofensivo</td></tr>
+<tr><td>4</td><td>Bard 4</td><td>College of Swords</td><td>Sharpshooter</td><td>Enhance Ability, Blade Ward</td><td>Dano escala</td></tr>
+<tr><td>5</td><td>Bard 5</td><td>College of Swords</td><td>—</td><td>Hypnotic Pattern / Fear</td><td>Font of Inspiration</td></tr>
+<tr><td>6</td><td>Bard 6</td><td>College of Swords</td><td>—</td><td>—</td><td>Extra Attack</td></tr>
+<tr><td>7</td><td>Fighter 1</td><td>—</td><td>Archery Fighting Style</td><td>—</td><td>Resolve precisão</td></tr>
+<tr><td>8</td><td>Fighter 2</td><td>—</td><td>—</td><td>Action Surge</td><td>Burst</td></tr>
+<tr><td>9</td><td>Bard 7</td><td>College of Swords</td><td>—</td><td>Plant Growth</td><td>Controle</td></tr>
+<tr><td>10</td><td>Bard 8</td><td>College of Swords</td><td>Alert</td><td>Greater Invisibility / Confusion</td><td>Iniciativa + controle</td></tr>
+<tr><td>11</td><td>Bard 9</td><td>College of Swords</td><td>—</td><td>Hold Monster</td><td>Escala de controle</td></tr>
+<tr><td>12</td><td>Bard 10</td><td>College of Swords</td><td>Magical Secrets</td><td>Counterspell, Hunger of Hadar</td><td>Fecha a build</td></tr>
+</table></div>`},
+    {title:'Starting the Game — Level 1',content:`<h4>Races</h4><p>Não fixa raça obrigatória. <strong>Githyanki</strong> muito útil por <strong>Misty Step</strong>. <strong>Astarion origin</strong> funciona muito bem com bônus ofensivos que escalam com alto número de ataques.</p>
+<h4>Class</h4><p><strong>Bard.</strong> Virar o <strong>party face</strong>, cobrir diálogos, skills e lockpicking desde cedo.</p>
+<h4>Background</h4><p><strong>Guild Artisan</strong> — explicitamente sugerido como melhor para party face (<strong>Insight + Persuasion</strong>).</p>
+<h4>Abilities — Setup Inicial</h4>
+<div class="tbl-wrap"><table><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+<tr><td>Não claro</td><td><strong>Alto</strong></td><td><strong>Alto</strong></td><td>Não claro</td><td>Não claro</td><td><strong>14</strong></td></tr></table></div>
+<h4>Abilities — Otimizado com Gloves of Dexterity</h4>
+<div class="tbl-wrap"><table><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+<tr><td>Não claro</td><td>8 (sheet)</td><td>Não claro</td><td>Não claro</td><td><strong>14</strong></td><td><strong>16</strong></td></tr></table></div>
+<h4>Skills and Expertise</h4><ul>
+<li><strong>Sleight of Hand</strong>: prioritária</li>
+<li><strong>Persuasion</strong>: prioritária</li>
+<li>Pelo menos duas dialogue skills</li>
+<li><strong>Perception</strong> mencionada como boa</li>
+<li>Sleight of Hand e Perception expertise como picks úteis</li></ul>`},
+    {title:'Leveling Progression — Level 2-12',content:`<h4>Level 2 — Bard 2</h4><p>Song of Rest, Jack of All Trades. Utility spells (Feather Fall). Save DC ainda baixa → foco em utilidade.</p>
+<h4>Level 3 — Bard 3 (College of Swords)</h4><p>Flourishes. <strong>Two-Weapon Fighting</strong>, Cloud of Daggers, Hold Person. <strong>Slashing Flourish</strong> dobra ataques. Opção de off-hand hand crossbow em alguns contextos.</p>
+<h4>Level 4 — Bard 4</h4><p>Feat: <strong>Sharpshooter</strong>. Enhance Ability, Blade Ward. Grande powerspike de dano. <strong>Gloves of Dexterity</strong> importantes para precisão.</p>
+<h4>Level 5 — Bard 5</h4><p><strong>Font of Inspiration.</strong> Hypnotic Pattern, Fear. Prioriza Illusion/Enchantment (viram bonus action depois).</p>
+<h4>Level 6 — Bard 6</h4><p><strong>Extra Attack.</strong> Volume sobe. Já funciona bem como arqueiro principal.</p>
+<h4>Level 7 — Fighter 1</h4><p><strong>Archery Fighting Style.</strong> Resolve dor principal com Sharpshooter. Bless + advantage + Archery mitigam penalidade.</p>
+<h4>Level 8 — Fighter 2</h4><p><strong>Action Surge.</strong> Multiplica burst.</p>
+<h4>Level 9 — Bard 7</h4><p><strong>Plant Growth.</strong> Útil sem depender de Arcane Acuity empilhada.</p>
+<h4>Level 10 — Bard 8</h4><p>Feat: <strong>Alert</strong> (DEX increase como alternativa; Ethel's Hair mencionado). Greater Invisibility e Confusion como opções.</p>
+<h4>Level 11 — Bard 9</h4><p><strong>Hold Monster.</strong> Controle forte, garante críticos automáticos.</p>
+<h4>Level 12 — Bard 10</h4><p><strong>Magical Secrets:</strong> <strong>Counterspell</strong> e <strong>Hunger of Hadar</strong>. Misty Step como opção se não tiver por raça/gear.</p>`},
+    {title:'Maximizing Ability Scores',content:`<p>Lógica híbrida:</p><ul>
+<li>No começo: <strong>DEX e CON altas</strong>, <strong>CHA 14</strong></li>
+<li>Depois com <strong>Gloves of Dexterity</strong>: respec para <strong>DEX 8</strong> no sheet, subir <strong>CHA 16</strong> e <strong>WIS 14</strong></li></ul>
+<p><strong>Ethel's Hair</strong> mencionado como possibilidade, não requisito. Maximização real passa mais por <strong>Arcane Acuity</strong> e pacote de itens-chave.</p>`},
+    {title:'Potions, Elixirs & Consumables',content:`<ul>
+<li><strong>Speak with Animals</strong> e <strong>Disguise Self</strong> disponíveis via itens/potions (não precisa priorizar como spell).</li>
+<li><strong>Strength Elixirs</strong> recomendados se usar <strong>Titanstring Bow</strong>.</li>
+<li><strong>Special arrows</strong> explicitamente valorizadas.</li></ul>
+<p><em>Weapon coatings não mencionados.</em></p>`},
+    {title:'Illithid Powers',content:`<p><em>Não informado na fonte.</em></p>`},
+    {title:'Equipment Recommendations',content:`<h4>Critérios Gerais (early)</h4><ul><li>Melhor arco disponível</li><li>Ferramentas de skill/face</li><li>Build ainda não está no pacote final de Arcane Acuity</li></ul>
+<h4>Mid Game</h4><ul><li><strong>Gloves of Dexterity</strong></li><li>Medium armor sem DEX cap</li><li>Shield</li><li><strong>Risky Ring</strong> como fonte de vantagem</li></ul>
+<h4>Act 3 — Final</h4><ul>
+<li><strong>Helmet of Arcane Acuity</strong></li>
+<li><strong>Band of the Mystic Scoundrel</strong></li>
+<li><strong>Gloves of Dexterity</strong></li>
+<li><strong>Dead Shot</strong> ou <strong>Titanstring Bow</strong></li>
+<li><strong>Club of Hill Giant Strength</strong> (se Titanstring sem elixir)</li>
+<li><strong>Knife of the Undermountain King</strong></li>
+<li>Shield</li>
+<li><strong>Special arrows</strong></li></ul>`},
+    {title:'Build Mechanics & Combos',content:`<h4>Combo Central</h4><ol>
+<li>Atacar com arco, idealmente com <strong>Slashing Flourish</strong></li>
+<li>Empilhar <strong>Arcane Acuity</strong> via capacete</li>
+<li>Converter em <strong>Illusion/Enchantment bonus action</strong> via <strong>Band of the Mystic Scoundrel</strong></li>
+<li>Travar inimigos com <strong>Tasha's</strong>, <strong>Hold Person</strong>, <strong>Hold Monster</strong>, <strong>Confusion</strong></li>
+<li>Usar <strong>Action Surge</strong> para explodir dano e/ou acelerar Acuity</li></ol>
+<h4>Early Game</h4><p>Já faz papel de face/skill monkey, mas sofre com chance de acerto até <strong>Archery Fighting Style</strong>.</p>
+<h4>Late Game</h4><p>Híbrido absurdo de <strong>arqueiro + controlador</strong>: alto dano + controles quase irresistíveis em bonus action após empilhar Acuity.</p>`},
+    {title:'Build Variations',content:`<ul>
+<li><strong>Lore Bard</strong> como alternativa mais defensiva</li>
+<li><strong>12 Swords Bard</strong> se não quiser Fighter</li>
+<li><strong>War Cleric dip</strong> para mais ataques bônus ocasionais</li>
+<li><strong>Fighter 4</strong> split como possibilidade</li></ul>`},
+    {title:'Conclusion',content:`<p>Build para quem quer concentrar em um só slot: <strong>face</strong>, <strong>lockpicker</strong>, <strong>skill monkey</strong>, <strong>arqueiro</strong> e <strong>controlador</strong>.</p>
+<p><span class="tag tag-g">Força</span> Teto absurdo: Arcane Acuity + Mystic Scoundrel</p>
+<p><span class="tag tag-r">Fraqueza</span> Dependência forte de itemização específica; fase pré-Archery</p>
+<p><span class="tag tag-b">Brilha em</span> Cobertura total de utilidade sem abrir mão de dano/controle</p>`},
+    {title:'Source Fidelity Notes',content:`<div class="fidelity">
+<h4>Explicitly Stated</h4><ul><li>É a quarta build</li><li>Bard para cobrir skills faltantes</li><li>Versão principal: Swords Bard, não Lore</li><li>Build arqueira</li><li>Helmet of Arcane Acuity + Band of the Mystic Scoundrel centrais</li></ul>
+<h4>Reorganized</h4><ul><li>Curva Bard → Fighter → Bard</li><li>Skill priorities</li><li>Separação: versão principal vs variações</li><li>Pacote de gear final</li></ul>
+<h4>Ambiguous / Unclear</h4><ul><li>Array inicial completa</li><li>Ato exato de vários itens</li><li>Spell selection intermediária tratada de forma solta</li></ul>
+<h4>Not Mentioned</h4><ul><li>Raça fixa ideal</li><li>Illithid powers</li><li>Weapon coatings</li><li>Backgrounds alternativos</li></ul>
+<h4>Possible Inconsistencies</h4><ul><li>Flexibilidade do quarto slot cai quando fixa Swords Bard otimizado</li></ul>
+<h4>Cross-Build Contamination</h4><ul><li>Counterspell também no Wizard</li><li>Bless/advantage para Sharpshooter dependem de sinergias</li><li>Buff-on-heal items do Cleric podem migrar para esta build</li></ul>
+</div>`}
+  ]
+}
+];
+
+// ─── RENDER ───
+const main = document.getElementById('main');
+const nav = document.getElementById('nav');
+const colors = {b1:'var(--build1)',b2:'var(--build2)',b3:'var(--build3)',b4:'var(--build4)'};
+
+builds.forEach(b => {
+  // NAV
+  const navDiv = document.createElement('div');
+  navDiv.className = 'nav-build open';
+  navDiv.innerHTML = `<div class="nav-build-title" data-build="${b.id}"><span class="dot" style="background:${b.color}"></span>${b.label}: ${b.title}<span class="arrow">▶</span></div>
+  <div class="nav-sub">${b.sections.map((s,i) => `<a data-target="${b.id}-s${i}">${s.title.replace(/—.*/,'').trim()}</a>`).join('')}</div>`;
+  navDiv.querySelector('.nav-build-title').onclick = function(){ navDiv.classList.toggle('open') };
+  nav.appendChild(navDiv);
+
+  // MAIN
+  let html = `<div class="build-section ${b.id}" id="${b.id}">
+  <div class="build-header"><h2>${b.label} — ${b.title}</h2></div>
+  <div class="section open"><div class="section-head" onclick="this.parentElement.classList.toggle('open')"><h3>Build Summary</h3><span class="chevron">▶</span></div>
+  <div class="section-body">${b.summary}
+  <div class="disclaimer" style="margin-top:14px"><strong>Disclaimer</strong><ul>${b.disclaimer.map(d=>`<li>${d}</li>`).join('')}</ul></div>
+  </div></div>`;
+
+  b.sections.forEach((s,i) => {
+    html += `<div class="section" id="${b.id}-s${i}"><div class="section-head" onclick="this.parentElement.classList.toggle('open')"><h3>${s.title}</h3><span class="chevron">▶</span></div><div class="section-body">${s.content}</div></div>`;
+  });
+  html += `</div>`;
+  main.insertAdjacentHTML('beforeend', html);
+});
+
+// ─── SEARCH ───
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', function(){
+  const q = this.value.trim().toLowerCase();
+  document.querySelectorAll('.section').forEach(sec => {
+    if(!q){ sec.style.display = ''; sec.classList.remove('open'); return; }
+    const text = sec.textContent.toLowerCase();
+    if(text.includes(q)){ sec.style.display = ''; sec.classList.add('open'); }
+    else { sec.style.display = 'none'; }
+  });
+});
+
+// ─── SCROLL TO TOP ───
+const topBtn = document.getElementById('top-btn');
+window.addEventListener('scroll', () => { topBtn.classList.toggle('show', window.scrollY > 400) });
+
+// ─── NAV LINKS ───
+nav.querySelectorAll('.nav-sub a').forEach(a => {
+  a.addEventListener('click', function(e){
+    e.preventDefault();
+    const target = document.getElementById(this.getAttribute('data-target'));
+    if(target){ document.querySelectorAll('.section.open').forEach(s=>s.classList.remove('open')); target.classList.add('open'); target.scrollIntoView({behavior:'smooth',block:'start'}); }
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
